@@ -1,0 +1,36 @@
+# -- Information about the dataset --
+dataset_info:
+  name: wnut_17
+# -- Information about labeling scheme and tagging format --
+labeling_scheme:
+  tagging_format: IOB2
+  label_names:
+    - PERSON
+    - ORG
+    - ADDRESS
+    - PHONE
+# -- Information about the model architecture --
+model_info:
+  # the huggingface checkpoint, or local model directory
+  model_checkpoint: distilbert/distilbert-base-uncased
+# -- Information about the training args --
+training_args:
+  output_dir: my_awesome_wnut_model
+  learning_rate: 2e-5
+  per_device_train_batch_size: 16
+  per_device_eval_batch_size: 16
+  num_train_epochs: 2
+  weight_decay: 0.01
+  report_to: none
+# -- Information about callbacks --
+callback_args:
+  early_stopping_args:
+    patience: 5
+# -- Information about evaluation methods --
+evaluation_args:
+  evaluation_metrics:
+    - precision
+    - recall
+    - f1
+  seqeval_args:
+    evaluation_mode: strict
