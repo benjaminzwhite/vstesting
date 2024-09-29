@@ -18,7 +18,10 @@ DEBUG = True
 
 # st_model_load = st.text("Loading model ...")
 
-# @st.cache(allow_output_mutation=True)
+# ==== TODO: CACHE MODEL LOAD ====
+# https://docs.streamlit.io/get-started/fundamentals/advanced-concepts
+#
+# @st.cache(allow_output_mutation=True) # <----------- DOCS SAY USE st.cache_resource https://docs.streamlit.io/get-started/fundamentals/advanced-concepts
 # def load_model():
 #     print("Loading model...")
 #     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -37,6 +40,14 @@ DEBUG = True
 #     st_model_load.text("")
 
 # ----------------------
+
+
+
+
+# TOGGLE WIDE MODE BY DEFAULT
+st.set_page_config(layout="wide")
+
+
 
 
 # ===========
@@ -82,26 +93,32 @@ def main():
     else:
         input_text = option
 
-    if st.button("Analyze"):
+    if st.button("Perform ABSA analysis"):
         with st.spinner("Running model..."):
             time.sleep(1)
             #result = model(input_text)
             #st.write("Prediction:", result[0]['label'], "| Score:", result[0]['score'])
             result = input_text + "!!!!!!"
             st.success('Model inference OK!', icon=":material/done_outline:")
-        st.subheader("Raw model output")
-        st.write(result)
 
-        # --- PARSE/PROCESS to spaCy visualizer ---
+        with st.container(border=True):
+            st.subheader("Raw model output")
+            st.write(result)
 
-        # ==== PRETEND THIS IS THE RAW MODEL OUTPUT ===
-        example_raw_model_output = " [{'opinion term': 'burgers', 'aspect category': 'food quality','sentiment': 'positive', 'justification': 'best'},{'opinion term':'service', 'aspect category':'service general','sentiment': 'negative', 'justification':'slow'},{'opinion term': 'tomato sauce', 'aspect category': 'food quality','sentiment': 'positive', 'justification': 'delicious'}]"
+            # --- PARSE/PROCESS to spaCy visualizer ---
 
-        dic_ents = process_raw_output(input_text, example_raw_model_output)
+            # ==== PRETEND THIS IS THE RAW MODEL OUTPUT ===
+            example_raw_model_output = " [{'opinion term': 'burgers', 'aspect category': 'food quality','sentiment': 'positive', 'justification': 'best'},{'opinion term':'service', 'aspect category':'service general','sentiment': 'negative', 'justification':'slow'},{'opinion term': 'tomato sauce', 'aspect category': 'food quality','sentiment': 'positive', 'justification': 'delicious'}]"
 
-        ent_html = displacy.render(dic_ents, manual=True, style="ent", options={"colors":COLOR_LOOKUP})
-        st.subheader("Processed output")
-        st.markdown(ent_html, unsafe_allow_html=True)
+            dic_ents, unparsable_llm_results = process_raw_output(input_text, example_raw_model_output)
+
+            ent_html = displacy.render(dic_ents, manual=True, style="ent", options={"colors":COLOR_LOOKUP})
+            st.subheader("Processed output")
+            st.markdown(ent_html, unsafe_allow_html=True)
+
+            if unparsable_llm_results:
+                st.subheader("Remaining unparsable results from model output")
+                st.write(unparsable_llm_results)
 
 if __name__ == "__main__":
     main()
